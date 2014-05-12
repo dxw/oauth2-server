@@ -63,7 +63,7 @@ add_action('wp_ajax_oauth2-approvedeny', function () {
   if (isset($_POST['approve'])) {
     // Approved
 
-    $code = $grant->newAuthoriseRequest('username???', $params['client_details']['client_id'], $params);
+    $code = $grant->newAuthoriseRequest('user', get_current_user_id(), $params);
 
     $uri = \League\OAuth2\Server\Util\RedirectUri::make(
       $params['client_details']['redirect_uri'], [
@@ -129,6 +129,7 @@ class ScopeModel implements \League\OAuth2\Server\Storage\ScopeInterface {
   // public function __construct() {
   // }
 
+  // Only return one scope
   public function getScope($scope, $clientId = null, $grantType = null) {
     $s = get_bloginfo('url') . '/';
 
@@ -151,10 +152,25 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   // }
 
   public function createSession($clientId, $ownerType, $ownerId) {
-    // trigger_error(json_encode(func_get_args()), E_USER_ERROR);
+    global $wpdb;
 
-    // TODO: store a record and return its ID
-    return 7;
+    if ($ownerType !== 'user') {
+      return false;
+    }
+
+    $c = $wpdb->insert($wpdb->prefix.'oauth2_server_sessions', [
+      'client_id' => $clientId,
+      'owner_type' => $ownerType,
+      'owner_id' => $ownerId, // this is the user's ID
+      'created_at' => current_time('mysql'),
+      'updated_at' => current_time('mysql'),
+    ]);
+
+    if ($c === 1) {
+      return $wpdb->insert_id;
+    }
+
+    return false;
   }
 
   public function updateSession($sessionId, $authCode = null, $accessToken = null, $refreshToken = null, $accessTokenExpire = null, $stage = 'requested') {
@@ -179,15 +195,44 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function deleteSession($clientId, $ownerType, $ownerId) {
-    // $x=[$clientId, $ownerType, $ownerId];
-    // trigger_error(json_encode($x), E_USER_ERROR);
-    //TODO: do something here???
+    global $wpdb;
+
+    $wpdb->update(
+      $wpdb->prefix.'oauth2_server_sessions',
+      [
+        'deleted_at' => current_time('mysql'),
+      ],
+      [
+      'client_id' => $clientId,
+      'owner_type' => $ownerType,
+      'owner_id' => $ownerId,
+      ]
+    );
+    // Ignore errors
   }
 
   public function validateAuthCode($clientId, $redirectUri, $authCode) {
-    if ($clientId === '123' && $authCode === 'hILoghl9raIiDYFKhFthbGuxjuSzDqIsPaIYfHsa') {
-      return true;
+    global $wpdb;
+
+    $sql = $wpdb->prepare("
+    SELECT session_id, id AS authcode_id
+    FROM {$wpdb->prefix}oauth2_server_auth_codes
+    WHERE session_id IN (
+      SELECT id FROM {$wpdb->prefix}oauth2_server_sessions WHERE client_id=%s AND deleted_at='0000-00-00 00:00:00'
+    )
+    AND auth_code=%s
+    AND deleted_at='0000-00-00 00:00:00'
+    ", $clientId, $authCode);
+
+    $row = $wpdb->get_row($sql, ARRAY_A);
+
+    if ($row !== false) {
+      return [
+        'session_id' => $row['session_id'],
+        'authcode_id' => $row['authcode_id'],
+      ];
     }
+
     return false;
   }
 
@@ -207,22 +252,34 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
     trigger_error(json_encode(7), E_USER_ERROR);
   }
 
+  // Do nothing - we only use one scope
   public function associateScope($sessionId, $scopeId) {
-    //TODO do something
   }
 
   public function getScopes($accessToken) {
     trigger_error(json_encode(9), E_USER_ERROR);
   }
 
+  // Do nothing - we get the redirectUri from the client ID
   public function associateRedirectUri($sessionId, $redirectUri) {
-    // TODO associate record $sessionId with $redirectUri
   }
 
   public function associateAccessToken($sessionId, $accessToken, $expireTime) {
-    if ($sessionId === 7 && $accessToken === 'w7KWDULMgFmgleJN8ABZwEPdvqYafZs2UwNys9hA' && $expireTime > 1) {
-      return 9;
+    global $wpdb;
+
+    $c = $wpdb->insert($wpdb->prefix.'oauth2_server_access_tokens', [
+      'session_id' => $sessionId,
+      'access_token' => $accessToken,
+      'expire_time' => $expireTime,
+      'created_at' => current_time('mysql'),
+      'updated_at' => current_time('mysql'),
+    ]);
+
+    if ($c === 1) {
+      return $wpdb->insert_id;
     }
+
+    return false;
   }
 
   public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId) {
@@ -230,21 +287,43 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function associateAuthCode($sessionId, $authCode, $expireTime) {
-    //TODO associate record $sessionId with $authCode and $expireTime
-    // And return an ID
-    return 8;
+    global $wpdb;
+
+    $c = $wpdb->insert($wpdb->prefix.'oauth2_server_auth_codes', [
+      'session_id' => $sessionId,
+      'auth_code' => $authCode,
+      'expire_time' => $expireTime,
+      'created_at' => current_time('mysql'),
+      'updated_at' => current_time('mysql'),
+    ]);
+
+    if ($c === 1) {
+      return $wpdb->insert_id;
+    }
+
+    return false;
   }
 
   public function removeAuthCode($sessionId) {
-    //TODO: remove something???
+    global $wpdb;
+
+    $wpdb->update(
+      $wpdb->prefix.'oauth2_server_auth_codes',
+      [
+        'deleted_at' => current_time('mysql'),
+      ],
+      [
+      'session_id' => $sessionId,
+      ]
+    );
   }
 
   public function removeRefreshToken($refreshToken) {
     trigger_error(json_encode(15), E_USER_ERROR);
   }
 
+  // Do nothing - we only have one scope
   public function associateAuthCodeScope($authCodeId, $scopeId) {
-    //TODO associate auth code ID $authCodeId with $scopeId
   }
 
   public function getAuthCodeScopes($oauthSessionAuthCodeId) {
