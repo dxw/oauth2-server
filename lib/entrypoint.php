@@ -41,7 +41,7 @@ add_action('wp_ajax_oauth2-approvedeny', function () {
     // Approved
 
     echo 'approved';
-    $code = $grant->newAuthoriseRequest('username', $params['client_id'], $params);
+    $code = $grant->newAuthoriseRequest('username???', $params['client_details']['client_id'], $params);
 
     echo(htmlspecialchars(json_encode($code))."<br>\n");
 
@@ -102,52 +102,18 @@ class ScopeModel implements \League\OAuth2\Server\Storage\ScopeInterface {
 
 class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
 
-  public function __construct() {
-  }
+  // public function __construct() {
+  // }
 
-  public function createSession($clientId, $redirectUri, $type = 'user', $typeId = null, $authCode = null, $accessToken = null, $refreshToken = null, $accessTokenExpire = null, $stage = 'requested') {
-    $this->db->query('
-    INSERT INTO oauth_sessions (
-      client_id,
-      redirect_uri,
-      owner_type,
-      owner_id,
-      auth_code,
-      access_token,
-      refresh_token,
-      access_token_expires,
-      stage,
-      first_requested,
-      last_updated
-    )
-    VALUES (
-      :clientId,
-      :redirectUri,
-      :type,
-      :typeId,
-      :authCode,
-      :accessToken,
-      :refreshToken,
-      :accessTokenExpire,
-      :stage,
-      UNIX_TIMESTAMP(NOW()),
-      UNIX_TIMESTAMP(NOW())
-    )', array(
-      ':clientId' =>  $clientId,
-      ':redirectUri'  =>  $redirectUri,
-      ':type' =>  $type,
-      ':typeId'   =>  $typeId,
-      ':authCode' =>  $authCode,
-      ':accessToken'  =>  $accessToken,
-      ':refreshToken' =>  $refreshToken,
-      ':accessTokenExpire'    =>  $accessTokenExpire,
-      ':stage'    =>  $stage
-    ));
+  public function createSession($clientId, $ownerType, $ownerId) {
+    // trigger_error(json_encode(func_get_args()), E_USER_ERROR);
 
-    return $this->db->getInsertId();
+    // TODO: store a record and return its ID
+    return 7;
   }
 
   public function updateSession($sessionId, $authCode = null, $accessToken = null, $refreshToken = null, $accessTokenExpire = null, $stage = 'requested') {
+    trigger_error(json_encode(2), E_USER_ERROR);
     $this->db->query('
     UPDATE oauth_sessions SET
     auth_code = :authCode,
@@ -167,20 +133,14 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
     ));
   }
 
-  public function deleteSession($clientId, $type, $typeId) {
-    $this->db->query('
-    DELETE FROM oauth_sessions WHERE
-    client_id = :clientId AND
-    owner_type = :type AND
-    owner_id = :typeId',
-    array(
-      ':clientId' =>  $clientId,
-      ':type'  =>  $type,
-      ':typeId' =>  $typeId
-    ));
+  public function deleteSession($clientId, $ownerType, $ownerId) {
+    // $x=[$clientId, $ownerType, $ownerId];
+    // trigger_error(json_encode($x), E_USER_ERROR);
+    //TODO: do something here???
   }
 
   public function validateAuthCode($clientId, $redirectUri, $authCode) {
+    trigger_error(json_encode(3), E_USER_ERROR);
     $result = $this->db->query('
     SELECT * FROM oauth_sessions WHERE
     client_id = :clientId AND
@@ -201,23 +161,23 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function validateAccessToken($accessToken) {
-    // Not needed for this demo
-    die(var_dump('validateAccessToken'));
+    trigger_error(json_encode(4), E_USER_ERROR);
   }
 
   public function getAccessToken($sessionId) {
-    // Not needed for this demo
+    trigger_error(json_encode(5), E_USER_ERROR);
   }
 
   public function validateRefreshToken($refreshToken, $clientId) {
-    // Not needed for this demo
+    trigger_error(json_encode(6), E_USER_ERROR);
   }
 
   public function updateRefreshToken($sessionId, $newAccessToken, $newRefreshToken, $accessTokenExpires) {
-    // Not needed for this demo
+    trigger_error(json_encode(7), E_USER_ERROR);
   }
 
   public function associateScope($sessionId, $scopeId) {
+    trigger_error(json_encode(8), E_USER_ERROR);
     $this->db->query('INSERT INTO oauth_session_scopes (session_id, scope_id) VALUE (:sessionId, :scopeId)', array(
       ':sessionId'    =>  $sessionId,
       ':scopeId'  =>  $scopeId
@@ -225,31 +185,41 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function getScopes($accessToken) {
-    // Not needed for this demo
+    trigger_error(json_encode(9), E_USER_ERROR);
   }
 
   public function associateRedirectUri($sessionId, $redirectUri) {
+    // TODO associate record $sessionId with $redirectUri
   }
 
   public function associateAccessToken($sessionId, $accessToken, $expireTime) {
+    trigger_error(json_encode(11), E_USER_ERROR);
   }
 
   public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId) {
+    trigger_error(json_encode(12), E_USER_ERROR);
   }
 
   public function associateAuthCode($sessionId, $authCode, $expireTime) {
+    //TODO associate record $sessionId with $authCode and $expireTime
+    // And return an ID
+    return 8;
   }
 
   public function removeAuthCode($sessionId) {
+    trigger_error(json_encode(14), E_USER_ERROR);
   }
 
   public function removeRefreshToken($refreshToken) {
+    trigger_error(json_encode(15), E_USER_ERROR);
   }
 
   public function associateAuthCodeScope($authCodeId, $scopeId) {
+    //TODO associate auth code ID $authCodeId with $scopeId
   }
 
   public function getAuthCodeScopes($oauthSessionAuthCodeId) {
+    trigger_error(json_encode(17), E_USER_ERROR);
   }
 
 }
