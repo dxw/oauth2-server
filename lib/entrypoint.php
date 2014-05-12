@@ -1,5 +1,14 @@
 <?php
 
+$GLOBALS['clients'] = [
+  '123' => [
+    'client_id' => '123',
+    'client secret' => '456',
+    'redirect_uri' => 'http://abc/happy',
+    'name' => 'Happy Client'
+  ],
+];
+
 // add_action('wp_ajax_nopriv_oauth2-entrypoint', function () {
 //   echo 'Not logged in. Log in plz and try again.';
 //   die();
@@ -102,16 +111,11 @@ class ClientModel implements \League\OAuth2\Server\Storage\ClientInterface {
     //TODO: clients should be stored in the DB and we should check that clientId/redirectUri match
 
     // echo(htmlspecialchars(json_encode([$clientId, $clientSecret, $redirectUri, $grantType]))."<br>\n");
-    if ($clientId !== '123') {
-      return false;
+    if (isset($GLOBALS['clients'][$clientId])) {
+      return $GLOBALS['clients'][$clientId];
     }
 
-    return array(
-      'client_id' => '123',
-      'client secret' => '456',
-      'redirect_uri' => 'http://abc/happy',
-      'name' => 'Happy Client'
-    );
+    return false;
   }
 
 }
