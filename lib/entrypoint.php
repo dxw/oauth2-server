@@ -58,9 +58,6 @@ add_action('wp_ajax_oauth2-approvedeny', function () {
   $server = $vars['server'];
   $params = $vars['params'];
 
-  // No point keeping this any longer than necessary
-  delete_user_meta(get_current_user_id(), 'oauth2_vars');
-
   $grant = $server->getGrantType('authorization_code');
 
   if (isset($_POST['approve'])) {
