@@ -30,6 +30,11 @@ add_action('wp_ajax_oauth2-auth', function () {
   $grant = $server->getGrantType('authorization_code');
   $params = $grant->checkAuthoriseParams();
 
+  update_user_meta(get_current_user_id(), 'oauth2_vars', [
+    'server' => $server,
+    'params' => $params,
+  ]);
+
   ?>
 
   A client wants to do stuff.
@@ -37,8 +42,6 @@ add_action('wp_ajax_oauth2-auth', function () {
   <form method="post" action="<?php echo esc_attr(get_admin_url(0, 'admin-ajax.php')) ?>">
     <input type="hidden" name="action" value="oauth2-approvedeny">
     <?php #TODO nonce ?>
-    <input type="hidden" name="server" value="<?php echo esc_attr(json_encode(serialize($server))) ?>">
-    <input type="hidden" name="params" value="<?php echo esc_attr(json_encode(serialize($params))) ?>">
     <input type="submit" name="approve" value="Approve">
     <input type="submit" name="deny" value="Deny">
   </form>
@@ -51,8 +54,12 @@ add_action('wp_ajax_oauth2-auth', function () {
 add_action('wp_ajax_oauth2-approvedeny', function () {
   //TODO: check nonce
 
-  $server = unserialize(json_decode(stripslashes($_POST['server']))); //TODO: this is wrong
-  $params = unserialize(json_decode(stripslashes($_POST['params']))); //TODO: this is wrong
+  $vars = get_user_meta(get_current_user_id(), 'oauth2_vars', true);
+  $server = $vars['server'];
+  $params = $vars['params'];
+
+  // No point keeping this any longer than necessary
+  delete_user_meta(get_current_user_id(), 'oauth2_vars');
 
   $grant = $server->getGrantType('authorization_code');
 
