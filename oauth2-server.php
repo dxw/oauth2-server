@@ -9,3 +9,4 @@ include(__DIR__.'/vendor.phar');
 
 include(__DIR__.'/lib/entrypoint.php');
 include(__DIR__.'/lib/db.php');
+include(__DIR__.'/lib/fix-for-basic-auth.php');
