@@ -5,6 +5,16 @@
 //   die();
 // });
 
+// This is where a user will generally enter the authentication process.
+//
+// Expected URL parameters:
+// - access_type=
+// - approval_prompt=
+// - client_id=123
+// - redirect_uri=http://abc/happy
+// - response_type=code
+// - scope=http://judiciary.ayumu/
+// - state=
 add_action('wp_ajax_oauth2-auth', function () {
   $server = new \League\OAuth2\Server\Authorization(new ClientModel, new SessionModel, new ScopeModel);
   $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode());
@@ -50,6 +60,26 @@ add_action('wp_ajax_oauth2-approvedeny', function () {
 
     echo 'denied';
   }
+
+  die();
+});
+
+// This is the URL the client application will make to check that the user isn't lying.
+//
+// Expected POST data:
+// - client_id=123
+// - client_secret=456
+// - code=w7KWDULMgFmgleJN8ABZwEPdvqYafZs2UwNys9hA
+// - grant_type=authorization_code
+// - redirect_uri=http://abc/happy
+// - scope=http://judiciary.ayumu/
+add_action('wp_ajax_nopriv_oauth2-token', function () {
+  $server = new \League\OAuth2\Server\Authorization(new ClientModel, new SessionModel, new ScopeModel);
+  $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode());
+
+  $p = $server->issueAccessToken();
+
+  echo json_encode($p);
 
   die();
 });
@@ -140,23 +170,9 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function validateAuthCode($clientId, $redirectUri, $authCode) {
-    trigger_error(json_encode(3), E_USER_ERROR);
-    $result = $this->db->query('
-    SELECT * FROM oauth_sessions WHERE
-    client_id = :clientId AND
-    redirect_uri = :redirectUri AND
-    auth_code = :authCode',
-    array(
-      ':clientId' =>  $clientId,
-      ':redirectUri'  =>  $redirectUri,
-      ':authCode' =>  $authCode
-    ));
-
-    while ($row = $result->fetch())
-    {
-      return (array) $row;
+    if ($clientId === '123' && $authCode === 'w7KWDULMgFmgleJN8ABZwEPdvqYafZs2UwNys9hA') {
+      return true;
     }
-
     return false;
   }
 
@@ -177,11 +193,7 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function associateScope($sessionId, $scopeId) {
-    trigger_error(json_encode(8), E_USER_ERROR);
-    $this->db->query('INSERT INTO oauth_session_scopes (session_id, scope_id) VALUE (:sessionId, :scopeId)', array(
-      ':sessionId'    =>  $sessionId,
-      ':scopeId'  =>  $scopeId
-    ));
+    //TODO do something
   }
 
   public function getScopes($accessToken) {
@@ -193,7 +205,9 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function associateAccessToken($sessionId, $accessToken, $expireTime) {
-    trigger_error(json_encode(11), E_USER_ERROR);
+    if ($sessionId === 7 && $accessToken === 'w7KWDULMgFmgleJN8ABZwEPdvqYafZs2UwNys9hA' && $expireTime > 1) {
+      return 9;
+    }
   }
 
   public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId) {
@@ -207,7 +221,7 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function removeAuthCode($sessionId) {
-    trigger_error(json_encode(14), E_USER_ERROR);
+    //TODO: remove something???
   }
 
   public function removeRefreshToken($refreshToken) {
@@ -219,7 +233,9 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function getAuthCodeScopes($oauthSessionAuthCodeId) {
-    trigger_error(json_encode(17), E_USER_ERROR);
+    return [
+      ['scope_id' => 'main'],
+    ];
   }
 
 }
