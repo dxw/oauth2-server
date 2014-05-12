@@ -50,10 +50,17 @@ add_action('wp_ajax_oauth2-approvedeny', function () {
   if (isset($_POST['approve'])) {
     // Approved
 
-    echo 'approved';
     $code = $grant->newAuthoriseRequest('username???', $params['client_details']['client_id'], $params);
 
-    echo(htmlspecialchars(json_encode($code))."<br>\n");
+    $uri = \League\OAuth2\Server\Util\RedirectUri::make(
+      $params['client_details']['redirect_uri'], [
+        'code' => $code,
+        'state' => $params['state'],
+      ]
+    );
+
+    wp_redirect($uri, 302); // 302 Found
+    die();
 
   } else {
     // Denied
@@ -170,7 +177,7 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
   }
 
   public function validateAuthCode($clientId, $redirectUri, $authCode) {
-    if ($clientId === '123' && $authCode === 'w7KWDULMgFmgleJN8ABZwEPdvqYafZs2UwNys9hA') {
+    if ($clientId === '123' && $authCode === 'hILoghl9raIiDYFKhFthbGuxjuSzDqIsPaIYfHsa') {
       return true;
     }
     return false;
