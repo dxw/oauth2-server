@@ -7,6 +7,11 @@
 
 include(__DIR__.'/vendor.phar');
 
-include(__DIR__.'/lib/entrypoint.php');
+include(__DIR__.'/lib/ajax.php');
 include(__DIR__.'/lib/db.php');
 include(__DIR__.'/lib/fix-for-basic-auth.php');
+
+# Models for the OAuth2 library
+include(__DIR__.'/lib/model-client.php');
+include(__DIR__.'/lib/model-scope.php');
+include(__DIR__.'/lib/model-session.php');
