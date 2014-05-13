@@ -34,7 +34,7 @@ class OAuth2Server_Ajax {
 
     <form method="post" action="<?php echo esc_attr(get_admin_url(0, 'admin-ajax.php')) ?>">
       <input type="hidden" name="action" value="oauth2-approvedeny">
-      <?php #TODO nonce ?>
+      <?php wp_nonce_field('approvedeny') ?>
       <input type="submit" name="approve" value="Approve">
       <input type="submit" name="deny" value="Deny">
     </form>
@@ -45,7 +45,11 @@ class OAuth2Server_Ajax {
   }
 
   function approvedeny() {
-    //TODO: check nonce
+    if (!wp_verify_nonce($_POST['_wpnonce'], 'approvedeny')) {
+      header('HTTP/1.1 500 Internal Server Error');
+      echo 'invalid nonce';
+      die();
+    }
 
     $vars = get_user_meta(get_current_user_id(), 'oauth2_vars', true);
     $server = $vars['server'];
