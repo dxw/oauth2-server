@@ -1,8 +1,10 @@
 <?php
 
-acf_add_options_sub_page('OAuth2 Server');
+if (function_exists('acf_add_options_sub_page')) {
+  acf_add_options_sub_page('OAuth2 Server');
+}
 
-if(function_exists("register_field_group")) {
+if (function_exists("register_field_group")) {
   register_field_group(array (
     'id' => 'acf_oauth2-server',
     'title' => 'OAuth2 Server',
