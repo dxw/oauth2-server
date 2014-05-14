@@ -37,7 +37,6 @@ class OAuth2Server_Ajax {
       <input type="hidden" name="action" value="oauth2-approvedeny">
       <?php wp_nonce_field('approvedeny') ?>
       <input type="submit" name="approve" value="Approve">
-      <input type="submit" name="deny" value="Deny">
     </form>
 
     <?php
