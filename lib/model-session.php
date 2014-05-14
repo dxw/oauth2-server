@@ -130,6 +130,78 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
     return false;
   }
 
+  public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId) {
+    global $wpdb;
+
+    $c = $wpdb->insert($wpdb->prefix.'oauth2_server_refresh_tokens', [
+      'access_token_id' => $accessTokenId,
+      'refresh_token' => $refreshToken,
+      'expire_time' => $expireTime,
+      'client_id' => $clientId,
+      'created_at' => current_time('mysql'),
+      'updated_at' => current_time('mysql'),
+    ]);
+
+    if ($c === 1) {
+      return $wpdb->insert_id;
+    }
+
+    return false;
+  }
+
+  public function validateRefreshToken($refreshToken, $clientId) {
+    global $wpdb;
+
+    $sql = $wpdb->prepare("
+    SELECT access_token_id
+    FROM {$wpdb->prefix}oauth2_server_refresh_tokens
+    WHERE client_id=%s
+    AND refresh_token=%s
+    AND deleted_at='0000-00-00 00:00:00'
+    ", $clientId, $refreshToken);
+
+    $var = absint($wpdb->get_var($sql));
+
+    if ($var > 0) {
+      return $var;
+    }
+
+    return false;
+  }
+
+  public function getAccessToken($sessionId) {
+    global $wpdb;
+
+    $sql = $wpdb->prepare("
+    SELECT id, session_id, access_token, expire_time
+    FROM {$wpdb->prefix}oauth2_server_access_tokens
+    WHERE session_id=%s
+    AND deleted_at='0000-00-00 00:00:00'
+    ", $sessionId);
+
+    $row = $wpdb->get_row($sql, ARRAY_A);
+
+    if ($row !== false) {
+      return [
+        'id' => $row['id'],
+        'session_id' => $row['session_id'],
+        'access_token' => $row['access_token'],
+        'access_token_expires' => $row['expire_time'],
+      ];
+    }
+
+    return false;
+  }
+
+  public function getScopes($accessToken) {
+    return [
+      'id' => 1,
+      'scope' => 'main',
+      'name' => '',
+      'description' => '',
+    ];
+  }
+
   // Do nothing - we only have one scope
   public function associateAuthCodeScope($authCodeId, $scopeId) {
   }
@@ -144,14 +216,6 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
 
   // Unimplemented but required by the interface
 
-  public function getScopes($accessToken) {
-    trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
-  }
-
-  public function associateRefreshToken($accessTokenId, $refreshToken, $expireTime, $clientId) {
-    trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
-  }
-
   public function removeRefreshToken($refreshToken) {
     trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
   }
@@ -160,14 +224,6 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
     trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
   }
   public function validateAccessToken($accessToken) {
-    trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
-  }
-
-  public function getAccessToken($sessionId) {
-    trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
-  }
-
-  public function validateRefreshToken($refreshToken, $clientId) {
     trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
   }
 

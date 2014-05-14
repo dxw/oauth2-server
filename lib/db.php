@@ -38,6 +38,17 @@ class OAuth2Server_DB {
       deleted_at DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
       UNIQUE KEY id (id)
     );
+    CREATE TABLE {$wpdb->prefix}oauth2_server_refresh_tokens (
+      id INT NOT NULL AUTO_INCREMENT,
+      access_token_id INT,
+      refresh_token TEXT,
+      expire_time INT,
+      client_id TEXT,
+      created_at DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+      updated_at DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+      deleted_at DATETIME DEFAULT '0000-00-00 00:00:00' NOT NULL,
+      UNIQUE KEY id (id)
+    );
     ";
 
     require_once( ABSPATH . 'wp-admin/includes/upgrade.php' );

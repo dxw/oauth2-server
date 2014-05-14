@@ -20,6 +20,7 @@ class OAuth2Server_Ajax {
   function auth() {
     $server = new \League\OAuth2\Server\Authorization(new ClientModel, new SessionModel, new ScopeModel);
     $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode());
+
     $grant = $server->getGrantType('authorization_code');
     $params = $grant->checkAuthoriseParams();
 
@@ -96,6 +97,7 @@ class OAuth2Server_Ajax {
 
     $server = new \League\OAuth2\Server\Authorization(new ClientModel, new SessionModel, new ScopeModel);
     $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode());
+    $server->addGrantType(new \League\OAuth2\Server\Grant\RefreshToken());
 
     $p = $server->issueAccessToken();
 
