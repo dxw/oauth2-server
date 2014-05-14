@@ -106,7 +106,9 @@ class OAuth2Server_Ajax {
 
     $user_id = absint($wpdb->get_var($wpdb->prepare("SELECT owner_id FROM wp_oauth2_server_sessions WHERE id IN (SELECT session_id FROM wp_oauth2_server_access_tokens WHERE access_token=%s)", $p['access_token'])));
     if ($user_id === 0) {
-      trigger_error('UNKNOWN USER', E_USER_ERROR);
+      header('HTTP/1.1 500 Internal Server Error');
+      echo 'invalid auth code';
+      die();
     }
     $user = get_user_by('id', $user_id);
 
