@@ -45,7 +45,8 @@ class OAuth2Server_Ajax {
   }
 
   function approvedeny() {
-    if (!wp_verify_nonce($_POST['_wpnonce'], 'approvedeny')) {
+    // OAUTH2_SERVER_TEST_NONCE_OVERRIDE should never be set on a production server - it's used by the test suite
+    if (!(wp_verify_nonce($_POST['_wpnonce'], 'approvedeny') || (defined('OAUTH2_SERVER_TEST_NONCE_OVERRIDE') && $_POST['_wpnonce'] === OAUTH2_SERVER_TEST_NONCE_OVERRIDE))) {
       header('HTTP/1.1 500 Internal Server Error');
       echo 'invalid nonce';
       die();
