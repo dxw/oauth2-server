@@ -169,6 +169,20 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
     return false;
   }
 
+  public function removeRefreshToken($refreshToken) {
+    global $wpdb;
+
+    $wpdb->update(
+      $wpdb->prefix.'oauth2_server_refresh_tokens',
+      [
+        'deleted_at' => current_time('mysql'),
+      ],
+      [
+      'refresh_token' => $refreshToken,
+      ]
+    );
+  }
+
   public function getAccessToken($sessionId) {
     global $wpdb;
 
@@ -195,10 +209,12 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
 
   public function getScopes($accessToken) {
     return [
-      'id' => 1,
-      'scope' => 'main',
-      'name' => '',
-      'description' => '',
+      [
+        'id' => 1,
+        'scope' => get_bloginfo('url') . '/',
+        'name' => '',
+        'description' => '',
+      ]
     ];
   }
 
@@ -210,15 +226,12 @@ class SessionModel implements \League\OAuth2\Server\Storage\SessionInterface {
 
   public function getAuthCodeScopes($oauthSessionAuthCodeId) {
     return [
+      // ['scope_id' => get_bloginfo('url') . '/'],
       ['scope_id' => 'main'],
     ];
   }
 
   // Unimplemented but required by the interface
-
-  public function removeRefreshToken($refreshToken) {
-    trigger_error('NOT IMPLEMENTED', E_USER_ERROR);
-  }
 
   public function updateSession($sessionId, $authCode = null, $accessToken = null, $refreshToken = null, $accessTokenExpire = null, $stage = 'requested') {
     trigger_error('NOT IMPLEMENTED', E_USER_ERROR);

@@ -98,6 +98,8 @@ class OAuth2Server_Ajax {
     $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode());
     $server->addGrantType(new \League\OAuth2\Server\Grant\RefreshToken());
 
+    $server->getGrantType('refresh_token')->rotateRefreshTokens(true);
+
     $p = $server->issueAccessToken();
 
     // Add user data
