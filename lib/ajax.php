@@ -115,6 +115,7 @@ class OAuth2Server_Ajax {
     $p['information'] = [
       'email' => $user->data->user_email,
       'display_name' => $user->data->display_name,
+      'extra' => apply_filters('oauth2_server_extra', [], $user_id),
     ];
 
     echo json_encode($p);
