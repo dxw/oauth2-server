@@ -104,7 +104,7 @@ class OAuth2Server_Ajax {
 
     // Add user data
 
-    $user_id = absint($wpdb->get_var($wpdb->prepare("SELECT owner_id FROM wp_oauth2_server_sessions WHERE id IN (SELECT session_id FROM wp_oauth2_server_access_tokens WHERE access_token=%s)", $p['access_token'])));
+    $user_id = absint($wpdb->get_var($wpdb->prepare("SELECT owner_id FROM {$wpdb->prefix}oauth2_server_sessions WHERE id IN (SELECT session_id FROM {$wpdb->prefix}oauth2_server_access_tokens WHERE access_token=%s)", $p['access_token'])));
     if ($user_id === 0) {
       header('HTTP/1.1 500 Internal Server Error');
       echo 'invalid auth code';
