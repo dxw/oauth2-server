@@ -2,7 +2,7 @@
 
 class OAuth2Server_DB {
   function __construct() {
-    $this->createTables();
+    add_action('admin_init', [$this, 'createTables']);
   }
 
   function createTables() {
