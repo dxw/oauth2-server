@@ -24,61 +24,18 @@ class OAuth2Server_Ajax {
     $grant = $server->getGrantType('authorization_code');
     $params = $grant->checkAuthoriseParams();
 
-    update_user_meta(get_current_user_id(), 'oauth2_vars', [
-      'server' => $server,
-      'params' => $params,
-    ]);
+    // Skip the "Approve" button and just log the user in
 
-    ?>
+    $code = $grant->newAuthoriseRequest('user', get_current_user_id(), $params);
 
-    A client wants to do stuff.
+    $uri = \League\OAuth2\Server\Util\RedirectUri::make(
+      $params['client_details']['redirect_uri'], [
+        'code' => $code,
+        'state' => $params['state'],
+      ]
+    );
 
-    <form method="post" action="<?php echo esc_attr(get_admin_url(0, 'admin-ajax.php')) ?>">
-      <input type="hidden" name="action" value="oauth2-approvedeny">
-      <?php wp_nonce_field('approvedeny') ?>
-      <input type="submit" name="approve" value="Approve">
-    </form>
-
-    <?php
-
-    die();
-  }
-
-  function approvedeny() {
-    // OAUTH2_SERVER_TEST_NONCE_OVERRIDE should never be set on a production server - it's used by the test suite
-    if (!(wp_verify_nonce($_POST['_wpnonce'], 'approvedeny') || (defined('OAUTH2_SERVER_TEST_NONCE_OVERRIDE') && $_POST['_wpnonce'] === OAUTH2_SERVER_TEST_NONCE_OVERRIDE))) {
-      header('HTTP/1.1 500 Internal Server Error');
-      echo 'invalid nonce';
-      die();
-    }
-
-    $vars = get_user_meta(get_current_user_id(), 'oauth2_vars', true);
-    $server = $vars['server'];
-    $params = $vars['params'];
-
-    $grant = $server->getGrantType('authorization_code');
-
-    if (isset($_POST['approve'])) {
-      // Approved
-
-      $code = $grant->newAuthoriseRequest('user', get_current_user_id(), $params);
-
-      $uri = \League\OAuth2\Server\Util\RedirectUri::make(
-        $params['client_details']['redirect_uri'], [
-          'code' => $code,
-          'state' => $params['state'],
-        ]
-      );
-
-      wp_redirect($uri, 302); // 302 Found
-      die();
-
-    } else {
-      // Denied
-
-      echo 'denied';
-    }
-
+    wp_redirect($uri, 302); // 302 Found
     die();
   }
 
