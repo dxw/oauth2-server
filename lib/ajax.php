@@ -3,6 +3,7 @@
 class OAuth2Server_Ajax {
   function __construct() {
     add_action('wp_ajax_oauth2-auth', [$this, 'auth']);
+    add_action('wp_ajax_nopriv_oauth2-auth', [$this, 'auth_nopriv']);
     add_action('wp_ajax_oauth2-approvedeny', [$this, 'approvedeny']);
     add_action('wp_ajax_nopriv_oauth2-token', [$this, 'token']);
   }
@@ -36,6 +37,16 @@ class OAuth2Server_Ajax {
     );
 
     wp_redirect($uri, 302); // 302 Found
+    die();
+  }
+
+  // This is where a user will end up if they enter the authentication process without logging in.
+  // It just redirects people to the login form, with the privileged auth ajax handler above as the
+  // redirect target.
+  function auth_nopriv() {
+    $auth_url = admin_url('admin-ajax.php', 'absolute') . '?' . $_SERVER['QUERY_STRING'];
+
+    wp_redirect(site_url("wp-login.php?redirect_to=" . urlencode($auth_url)), 301);
     die();
   }
 
