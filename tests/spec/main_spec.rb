@@ -321,5 +321,29 @@ describe "OAuth2Server" do
 
       response.body.should == 'invalid auth code'
     end
+
+    it "doesn't raise exceptions" do
+      code = 'Pterodon'
+      @mysql.query("INSERT INTO wp_oauth2_server_sessions SET client_id='456', owner_type='user', owner_id=(SELECT ID FROM wp_users WHERE user_email='tom@dxw.com')")
+      session_id = @mysql.insert_id
+      @mysql.query("INSERT INTO wp_oauth2_server_auth_codes SET session_id=%d, auth_code='%s', expire_time=99999999999999999" % [session_id, code])
+
+      response = Http::post(
+        '/wp-admin/admin-ajax.php?action=oauth2-token',
+        body: {
+          client_id: '456',
+          client_secret: '789',
+          code: code,
+          grant_type: 'basilosaurus',
+          redirect_uri: 'http://def/happy',
+          scope: 'http://localhost:8910/',
+        },
+        # No cookies here
+      )
+      response.body.should be_a String
+      response.body.should_not contain 'Fatal error: Uncaught exception'
+      response.response.code.should == '500'
+      response.body.should == 'invalid grant type'
+    end
   end
 end
