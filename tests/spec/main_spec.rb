@@ -341,7 +341,7 @@ describe "OAuth2Server" do
         # No cookies here
       )
       response.body.should be_a String
-      response.body.should_not contain 'Fatal error: Uncaught exception'
+      response.body.should_not include 'Fatal error: Uncaught exception'
       response.response.code.should == '500'
       response.body.should == 'invalid grant type'
     end

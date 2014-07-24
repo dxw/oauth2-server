@@ -68,7 +68,14 @@ class OAuth2Server_Ajax {
 
     $server->getGrantType('refresh_token')->rotateRefreshTokens(true);
 
-    $p = $server->issueAccessToken();
+    try {
+      $p = $server->issueAccessToken();
+    } catch (\League\OAuth2\Server\Exception\ClientException $e) {
+      // No funny business
+      header('HTTP/1.1 500 Internal Server Error');
+      echo 'invalid grant type';
+      die();
+    }
 
     // Add user data
 
