@@ -6,6 +6,15 @@ class Http
   include HTTParty
   base_uri 'http://localhost:8910/'
   follow_redirects false
+
+  def self::timed_post(*args)
+    t = Time.now
+    ret = self::post(*args)
+    elapsed = Time.now - t
+    puts
+    puts "#{args} - #{elapsed}s"
+    return ret
+  end
 end
 
 # Takes a response, outputs the cookies as they should appear in the Cookie header of a request
@@ -105,7 +114,7 @@ describe "OAuth2Server" do
 
       code = query['code']
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '123',
@@ -190,7 +199,7 @@ describe "OAuth2Server" do
       session_id = @mysql.insert_id
       @mysql.query("INSERT INTO wp_oauth2_server_auth_codes SET session_id=%d, auth_code='%s', expire_time=99999999999999999" % [session_id, code])
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '456',
@@ -223,7 +232,7 @@ describe "OAuth2Server" do
       session_id = @mysql.insert_id
       @mysql.query("INSERT INTO wp_oauth2_server_auth_codes SET session_id=%d, auth_code='%s', expire_time=99999999999999999" % [session_id, code])
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '456',
@@ -254,7 +263,7 @@ describe "OAuth2Server" do
       access_token_id = @mysql.insert_id
       @mysql.query("INSERT INTO wp_oauth2_server_refresh_tokens SET access_token_id=%d, refresh_token='%s', client_id='456'" % [access_token_id, refresh_token])
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '456',
@@ -283,7 +292,7 @@ describe "OAuth2Server" do
       session_id = @mysql.insert_id
       @mysql.query("INSERT INTO wp_oauth2_server_auth_codes SET session_id=%d, auth_code='%s', expire_time=99999999999999999" % [session_id, code])
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '456',
@@ -304,7 +313,7 @@ describe "OAuth2Server" do
 
       # Replay
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '456',
@@ -328,7 +337,7 @@ describe "OAuth2Server" do
       session_id = @mysql.insert_id
       @mysql.query("INSERT INTO wp_oauth2_server_auth_codes SET session_id=%d, auth_code='%s', expire_time=99999999999999999" % [session_id, code])
 
-      response = Http::post(
+      response = Http::timed_post(
         '/wp-admin/admin-ajax.php?action=oauth2-token',
         body: {
           client_id: '456',
