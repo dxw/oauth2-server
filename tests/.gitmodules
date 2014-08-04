@@ -1,3 +1,0 @@
-[submodule "oauth2-server"]
-	path = oauth2-server
-	url = git@git.dxw.net:dxw-wp-plugins/oauth2-server
