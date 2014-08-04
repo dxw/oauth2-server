@@ -327,8 +327,10 @@ describe "OAuth2Server" do
       )
       response.response.code.should == '500'
       response.body.should be_a String
+      body = JSON.parse(response.body)
 
-      response.body.should == 'invalid auth code'
+      body['error'].should be_true
+      body['message'].should == 'invalid auth code'
     end
 
     it "doesn't raise exceptions" do
@@ -352,7 +354,10 @@ describe "OAuth2Server" do
       response.body.should be_a String
       response.body.should_not include 'Fatal error: Uncaught exception'
       response.response.code.should == '500'
-      response.body.should == 'invalid grant type'
+      body = JSON.parse(response.body)
+
+      body['error'].should be_true
+      body['message'].should == 'invalid grant type'
     end
   end
 end
