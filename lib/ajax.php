@@ -4,7 +4,6 @@ class OAuth2Server_Ajax {
   function __construct() {
     add_action('wp_ajax_oauth2-auth', [$this, 'auth']);
     add_action('wp_ajax_nopriv_oauth2-auth', [$this, 'auth_nopriv']);
-    add_action('wp_ajax_oauth2-approvedeny', [$this, 'approvedeny']);
     add_action('wp_ajax_nopriv_oauth2-token', [$this, 'token']);
   }
 
