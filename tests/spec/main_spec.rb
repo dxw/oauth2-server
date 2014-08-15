@@ -24,7 +24,7 @@ end
 
 describe "OAuth2Server" do
   before :all do
-    @mysql = Mysql.new(nil, 'root', nil, 'oauth2servertest')
+    @mysql = Mysql.new('localhost', 'root', nil, 'oauth2servertest')
 
     # Get WP if we don't already have it
     system("test -f latest.zip || wget http://wordpress.org/latest.zip").should be_true
