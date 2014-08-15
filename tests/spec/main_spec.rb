@@ -22,26 +22,32 @@ def extract_cookies(response)
   response.headers.get_fields('Set-Cookie').map {|a| a.split(';')[0]}.join('; ')
 end
 
+RSpec.configure do |config|
+  config.expect_with :rspec do |c|
+    c.syntax = [:expect, :should]
+  end
+end
+
 describe "OAuth2Server" do
   before :all do
     @mysql = Mysql.new('localhost', 'root', nil, 'oauth2servertest')
 
     # Get WP if we don't already have it
-    system("test -f latest.zip || wget http://wordpress.org/latest.zip").should be_true
-    system("test -d wordpress || unzip latest.zip").should be_true
-    system("rm -rf wordpress/wp-content/plugins/oauth2-server && mkdir -p wordpress/wp-content/plugins/oauth2-server").should be_true
+    system("test -f latest.zip || wget http://wordpress.org/latest.zip").should be_truthy
+    system("test -d wordpress || unzip latest.zip").should be_truthy
+    system("rm -rf wordpress/wp-content/plugins/oauth2-server && mkdir -p wordpress/wp-content/plugins/oauth2-server").should be_truthy
     %w[oauth2-server.php lib vendor.phar].each do |f|
-      system("ln -s ../../../../../#{f} wordpress/wp-content/plugins/oauth2-server/").should be_true
+      system("ln -s ../../../../../#{f} wordpress/wp-content/plugins/oauth2-server/").should be_truthy
     end
 
     # Set up DB
     @mysql.query("DROP DATABASE IF EXISTS oauth2servertest")
     @mysql.query("CREATE DATABASE oauth2servertest")
     @mysql.query("USE oauth2servertest")
-    system("rm -f wordpress/wp-config.php").should be_true
-    system("echo 'define(\"OAUTH2_SERVER_TEST_NONCE_OVERRIDE\", \"sudo\");' | wp --path=wordpress/ core config --dbname=oauth2servertest --dbuser=root --extra-php").should be_true
-    system("wp --path=wordpress/ core install --url=http://localhost:8910/ --title=Test --admin_user=admin --admin_email=tom@dxw.com --admin_password=foobar").should be_true
-    system("wp --path=wordpress/ plugin activate oauth2-server").should be_true
+    system("rm -f wordpress/wp-config.php").should be_truthy
+    system("echo 'define(\"OAUTH2_SERVER_TEST_NONCE_OVERRIDE\", \"sudo\");' | wp --path=wordpress/ core config --dbname=oauth2servertest --dbuser=root --extra-php").should be_truthy
+    system("wp --path=wordpress/ core install --url=http://localhost:8910/ --title=Test --admin_user=admin --admin_email=tom@dxw.com --admin_password=foobar").should be_truthy
+    system("wp --path=wordpress/ plugin activate oauth2-server").should be_truthy
     @mysql.query("INSERT INTO wp_options SET option_name='options_client_applications', option_value='2'")
     @mysql.query("INSERT INTO wp_options SET option_name='options_client_applications_0_client_id', option_value='123'")
     @mysql.query("INSERT INTO wp_options SET option_name='options_client_applications_0_client_secret', option_value='456'")
@@ -54,8 +60,8 @@ describe "OAuth2Server" do
     @mysql.query("UPDATE wp_users SET display_name='C. lupus'")
 
     # Start WP
-    system("supervisord -c supervisord.conf").should be_true
-    system("supervisorctl -c supervisord.conf start all").should be_true
+    system("supervisord -c supervisord.conf").should be_truthy
+    system("supervisorctl -c supervisord.conf start all").should be_truthy
 
     # Store the test cookie
     response = Http::get('/wp-login.php')
@@ -84,8 +90,8 @@ describe "OAuth2Server" do
 
   after :all do
     # Stop WP
-    system("supervisorctl -c supervisord.conf stop all").should be_true
-    system("kill `cat supervisord.pid`").should be_true
+    system("supervisorctl -c supervisord.conf stop all").should be_truthy
+    system("kill `cat supervisord.pid`").should be_truthy
   end
 
   # Mega-test
@@ -329,7 +335,7 @@ describe "OAuth2Server" do
       response.body.should be_a String
       body = JSON.parse(response.body)
 
-      body['error'].should be_true
+      body['error'].should be_truthy
       body['message'].should == 'invalid auth code'
     end
 
@@ -356,7 +362,7 @@ describe "OAuth2Server" do
       response.response.code.should == '500'
       body = JSON.parse(response.body)
 
-      body['error'].should be_true
+      body['error'].should be_truthy
       body['message'].should == 'invalid grant type'
     end
   end
