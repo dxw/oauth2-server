@@ -4,6 +4,7 @@
 // Author: dxw
 // Author URI: http://dxw.com/
 // Version: 0.1.0
+// Whippet: yes
 
 include(__DIR__.'/vendor.phar');
 
