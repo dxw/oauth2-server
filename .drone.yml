@@ -22,8 +22,8 @@ script:
   # Fix mysql/gem
   - ln -s /var/run/mysqld/mysqld.sock /tmp/mysql.sock
 
-  # Composer
-  - curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  # Bundler
+  - gem install bundler
 
   # Install wp-cli and allow root to use it
   - wget https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar -O /usr/local/bin/wp.orig
@@ -32,12 +32,10 @@ script:
   - echo 'exec wp.orig --allow-root $@' >> /usr/local/bin/wp
   - chmod 755 /usr/local/bin/wp
 
-  - gem install rspec httparty nokogiri ruby-mysql
+  - sh -c 'cd tests && bundle install'
 
   # Create db
   - service mysql start
   - mysql -e 'CREATE DATABASE oauth2servertest'
-
-  - composer install
 
   - make test
