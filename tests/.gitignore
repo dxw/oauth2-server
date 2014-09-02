@@ -2,6 +2,3 @@
 /wordpress
 /cookies.txt
 /log
-/supervisord.pid
-/supervisord.sock
-/supervisord.log

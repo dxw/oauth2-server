@@ -60,8 +60,11 @@ describe "OAuth2Server" do
     @mysql.query("UPDATE wp_users SET display_name='C. lupus'")
 
     # Start WP
-    system("supervisord -c supervisord.conf").should be_truthy
-    system("supervisorctl -c supervisord.conf start all").should be_truthy
+    @wp_proc = fork do
+      exec 'php -d sendmail_path=/bin/false -S localhost:8910 -t wordpress/'
+    end
+    Process.detach(@wp_proc)
+    sleep(5)
 
     # Store the test cookie
     response = Http::get('/wp-login.php')
@@ -90,8 +93,8 @@ describe "OAuth2Server" do
 
   after :all do
     # Stop WP
-    system("supervisorctl -c supervisord.conf stop all").should be_truthy
-    system("kill `cat supervisord.pid`").should be_truthy
+    Process.kill('TERM', @wp_proc)
+    Process.wait(@wp_proc)
   end
 
   # Mega-test
