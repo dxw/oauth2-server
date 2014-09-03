@@ -94,7 +94,6 @@ describe "OAuth2Server" do
   after :all do
     # Stop WP
     Process.kill('TERM', @wp_proc)
-    Process.wait(@wp_proc)
   end
 
   # Mega-test
