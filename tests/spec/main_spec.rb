@@ -234,6 +234,38 @@ describe "OAuth2Server" do
       body['information']['display_name'].should == 'C. lupus'
     end
 
+    it "works with new-members-only" do
+      system("wget https://github.com/dxw/new-members-only/archive/master.tar.gz").should be_truthy
+      system("tar xzf master.tar.gz").should be_truthy
+      system("mv new-members-only-master wordpress/wp-content/plugins/new-members-only").should be_truthy
+      system("wp --path=wordpress/ plugin activate new-members-only").should be_truthy
+
+      code = 'Chiroptera'
+      @mysql.query("INSERT INTO wp_oauth2_server_sessions SET client_id='456', owner_type='user', owner_id=(SELECT ID FROM wp_users WHERE user_email='tom@dxw.com')")
+      session_id = @mysql.insert_id
+      @mysql.query("INSERT INTO wp_oauth2_server_auth_codes SET session_id=%d, auth_code='%s', expire_time=99999999999999999" % [session_id, code])
+
+      response = Http::timed_post(
+        '/wp-admin/admin-ajax.php?action=oauth2-token',
+        body: {
+          client_id: '456',
+          client_secret: '789',
+          code: code,
+          grant_type: 'authorization_code',
+          redirect_uri: 'http://def/happy',
+          scope: 'http://localhost:8910/',
+        },
+        # No cookies here
+      )
+      system("rm -rf wordpress/wp-content/plugins/new-members-only").should be_truthy
+
+      response.response.code.should == '200'
+      response.body.should be_a String
+      body = JSON.parse(response.body)
+
+      body['token_type'].should == 'Bearer'
+    end
+
     it "provides and stores a refresh token" do
       code = 'hymenoptera'
       @mysql.query("INSERT INTO wp_oauth2_server_sessions SET client_id='456', owner_type='user', owner_id=(SELECT ID FROM wp_users WHERE user_email='tom@dxw.com')")
