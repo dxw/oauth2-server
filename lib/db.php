@@ -4,10 +4,10 @@ class OAuth2Server_DB
 {
     public function __construct()
     {
-        register_activation_hook(__DIR__.'/../oauth2-server.php', [$this, 'createTables']);
+        register_activation_hook(__DIR__.'/../oauth2-server.php', ['OAuth2Server_DB', 'createTables']);
     }
 
-    public function createTables()
+    public static function createTables()
     {
         global $wpdb;
         $sql = "
