@@ -4,7 +4,7 @@ class OAuth2Server_DB
 {
     public function __construct()
     {
-        add_action('admin_init', [$this, 'createTables']);
+        register_activation_hook(__DIR__.'/../oauth2-server.php', [$this, 'createTables']);
     }
 
     public function createTables()
