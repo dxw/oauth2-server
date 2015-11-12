@@ -45,7 +45,7 @@ class OAuth2Server_Ajax {
   function auth_nopriv() {
     $auth_url = admin_url('admin-ajax.php', 'absolute') . '?' . $_SERVER['QUERY_STRING'];
 
-    wp_redirect(site_url("wp-login.php?redirect_to=" . urlencode($auth_url)), 301);
+    wp_redirect(site_url("wp-login.php?redirect_to=" . urlencode($auth_url)), 302);
     die();
   }
 
