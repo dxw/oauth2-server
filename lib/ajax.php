@@ -21,19 +21,24 @@ class OAuth2Server_Ajax {
     $server = new \League\OAuth2\Server\Authorization(new ClientModel, new SessionModel, new ScopeModel);
     $server->addGrantType(new \League\OAuth2\Server\Grant\AuthCode());
 
-    $grant = $server->getGrantType('authorization_code');
-    $params = $grant->checkAuthoriseParams();
+    try {
+        $grant = $server->getGrantType('authorization_code');
+        $params = $grant->checkAuthoriseParams();
 
-    // Skip the "Approve" button and just log the user in
+        // Skip the "Approve" button and just log the user in
 
-    $code = $grant->newAuthoriseRequest('user', get_current_user_id(), $params);
+        $code = $grant->newAuthoriseRequest('user', get_current_user_id(), $params);
 
-    $uri = \League\OAuth2\Server\Util\RedirectUri::make(
-      $params['client_details']['redirect_uri'], [
-        'code' => $code,
-        'state' => $params['state'],
-      ]
-    );
+        $uri = \League\OAuth2\Server\Util\RedirectUri::make(
+            $params['client_details']['redirect_uri'], [
+                'code' => $code,
+                'state' => $params['state'],
+            ]
+        );
+    } catch (\League\OAuth2\Server\Exception\OAuth2Exception $e) {
+        wp_redirect(site_url('/', 302));
+        die();
+    }
 
     wp_redirect($uri, 302); // 302 Found
     die();

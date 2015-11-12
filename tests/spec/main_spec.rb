@@ -413,5 +413,20 @@ describe "OAuth2Server" do
       actual.scheme.should == expected.scheme
       actual.host.should == expected.host
     end
+
+    it "redirects to the homepage when faced with a bad request" do
+      response = Http::get(
+        '/wp-admin/admin-ajax.php?action=oauth2-auth&access_type=&approval_prompt=&client_id=123&redirect_uri=http%3A%2F%2Fabc%2Fhap',
+        headers: {'Cookie' => @cookies},
+      )
+      response.response.code.should == '302'
+
+      expected = URI.parse('http://localhost:8910/')
+      actual = URI.parse(response.headers['Location'])
+
+      actual.path.should == expected.path
+      actual.scheme.should == expected.scheme
+      actual.host.should == expected.host
+    end
   end
 end
