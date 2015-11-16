@@ -1,10 +1,16 @@
-image: thedxw/wordpress-test
-script:
-  # Bundler
-  - sh -c 'cd tests && bundle install'
+build:
+  image: thedxw/wordpress-test
+  commands:
+    # Make it possible to execute builds on vboxsf filesystems
+    - cp -r . /build2
+    - cd /build2
 
-  # Create db
-  - service mysql start
-  - mysql -e 'CREATE DATABASE oauth2servertest'
+    # Bundler
+    - sh -c 'cd tests && bundle install'
 
-  - make test
+    # Create db
+    - service mysql start
+    - mysql -e 'CREATE DATABASE oauth2servertest'
+
+    # Test
+    - make test
