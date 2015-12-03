@@ -3,4 +3,4 @@
 all: test
 
 test:
-	cd tests && rspec spec/*_spec.rb
+	cd tests && bundle exec rspec spec/*_spec.rb

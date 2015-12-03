@@ -73,7 +73,7 @@ describe "OAuth2Server" do
 
     # Log in
     response = Http::post(
-      '/wp-login.php', 
+      '/wp-login.php',
       body: {
         log: 'admin',
         pwd: 'foobar',
@@ -85,7 +85,7 @@ describe "OAuth2Server" do
 
     # Verify that we've stored the cookies correctly
     response = Http::get(
-      '/wp-admin/', 
+      '/wp-admin/',
       headers: {'Cookie' => @cookies},
     )
     response.response.code.should == '200'
