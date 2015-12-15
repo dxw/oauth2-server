@@ -2,8 +2,7 @@ build:
   image: thedxw/wordpress-test
   commands:
     # Make it possible to execute builds on vboxsf filesystems
-    - cp -r . /build2
-    - cd /build2
+    - cp -r . /build2 && cd /build2
 
     # Bundler
     - sh -c 'cd tests && bundle install'

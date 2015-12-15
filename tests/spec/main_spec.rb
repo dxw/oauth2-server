@@ -73,7 +73,7 @@ describe "OAuth2Server" do
 
     # Log in
     response = Http::post(
-      '/wp-login.php', 
+      '/wp-login.php',
       body: {
         log: 'admin',
         pwd: 'foobar',
@@ -85,7 +85,7 @@ describe "OAuth2Server" do
 
     # Verify that we've stored the cookies correctly
     response = Http::get(
-      '/wp-admin/', 
+      '/wp-admin/',
       headers: {'Cookie' => @cookies},
     )
     response.response.code.should == '200'
@@ -398,6 +398,35 @@ describe "OAuth2Server" do
 
       body['error'].should be_truthy
       body['message'].should == 'invalid grant type'
+    end
+
+    it "redirects when user is logged out" do
+      response = Http::get(
+        '/wp-admin/admin-ajax.php?action=oauth2-auth&access_type=&approval_prompt=&client_id=123&redirect_uri=http%3A%2F%2Fabc%2Fhappy&response_type=code&scope=http%3A%2F%2Flocalhost:8910%2F&state='
+      )
+      response.response.code.should == '302'
+
+      expected = URI.parse('http://localhost:8910/wp-login.php?redirect_to=http%3A//localhost%3A8910/wp-admin/admin-ajax.php%3Faction%3Doauth2-auth%26access_type%3D%26approval_prompt%3D%26client_id%3D123%26redirect_uri%3Dhttp%253A%252F%252Fabc%252Fhappy%26response_type%3Dcode%26scope%3Dhttp%253A%252F%252Flocalhost%3A8910%252F%26state%3D')
+      actual = URI.parse(response.headers['Location'])
+
+      actual.path.should == expected.path
+      actual.scheme.should == expected.scheme
+      actual.host.should == expected.host
+    end
+
+    it "redirects to the homepage when faced with a bad request" do
+      response = Http::get(
+        '/wp-admin/admin-ajax.php?action=oauth2-auth&access_type=&approval_prompt=&client_id=123&redirect_uri=http%3A%2F%2Fabc%2Fhap',
+        headers: {'Cookie' => @cookies},
+      )
+      response.response.code.should == '302'
+
+      expected = URI.parse('http://localhost:8910/')
+      actual = URI.parse(response.headers['Location'])
+
+      actual.path.should == expected.path
+      actual.scheme.should == expected.scheme
+      actual.host.should == expected.host
     end
   end
 end
